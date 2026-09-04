@@ -90,12 +90,13 @@
       ]
     },
     {
-      "id": "emtnbin2bn9bk",
-      "turn": 2,
-      "type": "siege",
-      "title": "Capital caida",
-      "description": "aaaaaaaaaaaaaa",
+      "id": "emtnlhgw9wp6x",
+      "turn": 5,
+      "type": "diplomacy",
+      "title": "alianza",
+      "description": "tutte y jonan",
       "playerIds": [
+        "plmtn77wan29t6",
         "plmtn77wn4stem"
       ]
     }
