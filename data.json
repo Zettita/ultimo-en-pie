@@ -2,14 +2,14 @@
   "config": {
     "title": "La batalla del Señor",
     "status": "active",
-    "winnerId": "plmtn77t04r6vl"
+    "winnerId": ""
   },
   "players": [
     {
       "id": "plmtn77rtsdaag",
       "name": "Zetta",
       "faction": "Kislev",
-      "territories": 4,
+      "territories": 5,
       "battlesWon": 0,
       "status": "alive",
       "eliminatedTurn": null,
