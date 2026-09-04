@@ -1513,30 +1513,41 @@
       'Authorization': 'Bearer ' + gh.token,
       'Accept': 'application/vnd.github+json'
     };
+    var state = {config:config, players:players, events:events, alliances:alliances};
+    var contentB64 = b64EncodeUtf8(JSON.stringify(state, null, 2));
+
+    // Always ask GitHub for the file's current sha right before writing —
+    // `cache:'no-store'` so the browser never hands back a stale one.
+    async function currentSha(){
+      var res = await fetch(api + '?ref=' + encodeURIComponent(branch), {headers: headers, cache: 'no-store'});
+      if(res.status === 200) return (await res.json()).sha;
+      if(res.status === 404) return null;
+      throw new Error('No se pudo leer data.json actual (' + res.status + ')');
+    }
+
     try{
-      var sha = null;
-      var getRes = await fetch(api + '?ref=' + encodeURIComponent(branch), {headers: headers});
-      if(getRes.status === 200){
-        sha = (await getRes.json()).sha;
-      } else if(getRes.status !== 404){
-        throw new Error('No se pudo leer data.json actual (' + getRes.status + ')');
-      }
-      var state = {config:config, players:players, events:events, alliances:alliances};
-      var body = {
-        message: 'Actualizar crónica',
-        content: b64EncodeUtf8(JSON.stringify(state, null, 2)),
-        branch: branch
-      };
-      if(sha) body.sha = sha;
-      var putRes = await fetch(api, {
-        method: 'PUT',
-        headers: Object.assign({'Content-Type':'application/json'}, headers),
-        body: JSON.stringify(body)
-      });
-      if(!putRes.ok){
+      var lastErr = null;
+      // A 409 ("does not match") means the sha went stale between our read
+      // and our write — usually two saves close together. Safe to just
+      // re-read and retry: nothing is lost either way.
+      for(var attempt = 0; attempt < 3; attempt++){
+        var sha = await currentSha();
+        var body = {message: 'Actualizar crónica', content: contentB64, branch: branch};
+        if(sha) body.sha = sha;
+        var putRes = await fetch(api, {
+          method: 'PUT',
+          headers: Object.assign({'Content-Type':'application/json'}, headers),
+          body: JSON.stringify(body)
+        });
+        if(putRes.ok){
+          lastErr = null;
+          break;
+        }
         var errJson = await putRes.json().catch(function(){ return {}; });
-        throw new Error(errJson.message || ('Error ' + putRes.status));
+        lastErr = new Error(errJson.message || ('Error ' + putRes.status));
+        if(putRes.status !== 409) break;
       }
+      if(lastErr) throw lastErr;
       flash(flashEl, 'Guardado — tus amigos lo van a ver en unos segundos', false);
     }catch(e){
       flash(flashEl, 'No se pudo guardar: ' + (e && e.message ? e.message : 'error desconocido'), true);
