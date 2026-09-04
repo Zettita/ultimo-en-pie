@@ -1017,8 +1017,12 @@
   // opening this same link always fetches whatever is currently committed.
   function loadState(){
     return fetch('./data.json', {cache:'no-store'})
-      .then(function(res){ return res.ok ? res.json() : null; })
-      .then(applyState)
+      .then(function(res){ return res.ok ? res.text() : null; })
+      .then(function(text){
+        if(!text) return;
+        lastStateRaw = text;
+        applyState(JSON.parse(text));
+      })
       .catch(function(){})
       .then(function(){ renderAll(); });
   }
@@ -1433,12 +1437,18 @@
     document.getElementById('admin-content').style.display = unlocked ? 'block' : 'none';
   }
 
-  function renderAll(){
+  // The read-only chronicle side only — safe to re-run on a timer, since it
+  // never touches an admin form the owner might be mid-way through filling.
+  function renderPublic(){
     renderMasthead();
     renderStandings();
     renderAlliances();
     renderPlayerLegend();
     renderTimeline();
+  }
+
+  function renderAll(){
+    renderPublic();
     renderAdminConfig();
     renderAdminPlayers();
     renderAdminAlliances();
@@ -1446,6 +1456,25 @@
     renderEventLog();
     applyAdminLock();
   }
+
+  // ---------- Live-ish updates for viewers ----------
+  // Friends keeping the tab open don't get a push when someone saves, so
+  // poll data.json every 30s and quietly re-render if it actually changed.
+  // Skipped whenever "Sala de Guerra" is unlocked, so it can never clobber
+  // an in-progress edit there.
+  var lastStateRaw = null;
+  function pollState(){
+    if(unlocked) return;
+    fetch('./data.json', {cache:'no-store'})
+      .then(function(res){ return res.ok ? res.text() : null; })
+      .then(function(text){
+        if(!text || text === lastStateRaw) return;
+        lastStateRaw = text;
+        try{ applyState(JSON.parse(text)); renderPublic(); }catch(e){}
+      })
+      .catch(function(){});
+  }
+  setInterval(pollState, 30000);
 
   loadState();
 
@@ -1514,7 +1543,8 @@
       'Accept': 'application/vnd.github+json'
     };
     var state = {config:config, players:players, events:events, alliances:alliances};
-    var contentB64 = b64EncodeUtf8(JSON.stringify(state, null, 2));
+    var stateStr = JSON.stringify(state, null, 2);
+    var contentB64 = b64EncodeUtf8(stateStr);
 
     // Always ask GitHub for the file's current sha right before writing —
     // `cache:'no-store'` so the browser never hands back a stale one.
@@ -1548,6 +1578,7 @@
         if(putRes.status !== 409) break;
       }
       if(lastErr) throw lastErr;
+      lastStateRaw = stateStr;
       flash(flashEl, 'Guardado — tus amigos lo van a ver en unos segundos', false);
     }catch(e){
       flash(flashEl, 'No se pudo guardar: ' + (e && e.message ? e.message : 'error desconocido'), true);
