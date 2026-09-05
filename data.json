@@ -111,6 +111,18 @@
         "plmtn77wan29t6",
         "plmtn77wn4stem"
       ]
+    },
+    {
+      "id": "emtnmacpkshm8",
+      "turn": 2,
+      "type": "siege",
+      "title": "Asedio a la capital de Jonan",
+      "description": "Tutte y Linker le estan dando bomba, pero no al castillo",
+      "playerIds": [
+        "plmtn77wan29t6",
+        "plmtn77wn4stem",
+        "plmtnln4hbv70u"
+      ]
     }
   ],
   "alliances": {
