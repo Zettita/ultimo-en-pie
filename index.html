@@ -370,10 +370,17 @@
     flex-shrink:0;
   }
   .alliance-members{
+    display:flex; gap:6px; flex-wrap:wrap;
+    margin-bottom:8px;
+  }
+  .alliance-members span{
     font-family:'JetBrains Mono', ui-monospace, monospace;
     font-size:11px;
-    color:var(--ink-dim);
-    margin-bottom:8px;
+    color:var(--pc, var(--ink-dim));
+    border:1px solid var(--pc, var(--border));
+    background:color-mix(in srgb, var(--pc, transparent) 14%, transparent);
+    border-radius:2px;
+    padding:2px 7px;
   }
   .alliance-territories{
     font-family:'JetBrains Mono', ui-monospace, monospace;
@@ -1177,7 +1184,9 @@
       var g = groups[key];
       var name = alliances[key] || ('Alianza N°'+g.number);
       var pct = grandTotal > 0 ? Math.round(g.territories / grandTotal * 100) : 0;
-      var memberNames = g.members.map(function(p){ return esc(p.name); }).join(', ');
+      var memberNames = g.members.map(function(p){
+        return '<span style="--pc:'+playerColor(p.id)+'">'+esc(p.name)+'</span>';
+      }).join('');
       return '<div class="alliance-card">'
         + '<div class="alliance-card-head"><h3>'+esc(name)+'</h3><span class="alliance-pct">'+pct+'%</span></div>'
         + '<div class="alliance-members">'+memberNames+'</div>'
