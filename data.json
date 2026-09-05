@@ -123,6 +123,17 @@
         "plmtn77wn4stem",
         "plmtnln4hbv70u"
       ]
+    },
+    {
+      "id": "emtnmb9dj6p9w",
+      "turn": 3,
+      "type": "battle",
+      "title": "Xero pelea por el honor",
+      "description": "",
+      "playerIds": [
+        "plmtn77t04r6vl",
+        "plmtn77wan29t6"
+      ]
     }
   ],
   "alliances": {
