@@ -774,6 +774,17 @@
   }
 </style>
 
+<script>
+  // Applied as early as possible (before the rest of the body renders) so a
+  // manually-chosen theme never flashes the system one first.
+  (function(){
+    try{
+      var t = localStorage.getItem('uep-theme');
+      if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    }catch(e){}
+  })();
+</script>
+
 <div class="wrap wrap-top">
 
   <header class="masthead">
@@ -934,6 +945,8 @@
     <button type="button" class="link-btn" id="tab-chronicle" role="tab" aria-selected="true">Crónica</button>
     <span aria-hidden="true">·</span>
     <button type="button" class="link-btn" id="tab-admin" role="tab" aria-selected="false">Sala de Guerra</button>
+    <span aria-hidden="true">·</span>
+    <button type="button" class="link-btn" id="theme-toggle">Modo oscuro</button>
   </nav>
   <footer>Que los astros decidan quién se alza como Último en Pie.</footer>
 </div>
@@ -1492,6 +1505,24 @@
   }
   tabChronicle.addEventListener('click', function(){ selectTab('chronicle'); });
   tabAdmin.addEventListener('click', function(){ selectTab('admin'); });
+
+  // ---------- Theme toggle ----------
+  var themeToggle = document.getElementById('theme-toggle');
+  function currentTheme(){
+    var attr = document.documentElement.getAttribute('data-theme');
+    if(attr === 'light' || attr === 'dark') return attr;
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  function renderThemeToggle(){
+    themeToggle.textContent = currentTheme() === 'dark' ? 'Modo claro' : 'Modo oscuro';
+  }
+  themeToggle.addEventListener('click', function(){
+    var next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try{ localStorage.setItem('uep-theme', next); }catch(e){}
+    renderThemeToggle();
+  });
+  renderThemeToggle();
 
   // ---------- PIN gate ----------
   function tryUnlock(){
