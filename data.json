@@ -142,6 +142,16 @@
       "title": "Se cayo el game",
       "description": "xd",
       "playerIds": []
+    },
+    {
+      "id": "emtnqnwifq76v",
+      "turn": 8,
+      "type": "siege",
+      "title": "Asedio a la casa de Zetta",
+      "description": "Popeo una mujer chat, me tuve que ir",
+      "playerIds": [
+        "plmtn77rtsdaag"
+      ]
     }
   ],
   "alliances": {
